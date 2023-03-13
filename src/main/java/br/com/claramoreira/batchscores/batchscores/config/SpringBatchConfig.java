@@ -1,6 +1,8 @@
 package br.com.claramoreira.batchscores.batchscores.config;
 
-import java.time.LocalDate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +51,10 @@ import br.com.claramoreira.batchscores.batchscores.scheduler.SpringBatchQuartzSc
 @Configuration
 @EnableBatchProcessing
 public class SpringBatchConfig {
+	
+	
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+	
 	@Bean
 	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 	public Person person() {
@@ -120,7 +126,7 @@ public class SpringBatchConfig {
 	@Bean(destroyMethod = "")
 	public StaxEventItemWriter<Person> staxEventItemWriter(Jaxb2Marshaller marshaller) {
 		StaxEventItemWriter<Person> staxEventItemWriter = new StaxEventItemWriter<>();
-		staxEventItemWriter.setResource(new FileSystemResource("C:/temp/person" + LocalDate.now() + ".xml"));
+		staxEventItemWriter.setResource(new FileSystemResource("C:/temp/person_" + dateFormat.format(new Date()) + ".xml"));
 		staxEventItemWriter.setMarshaller(marshaller);
 		staxEventItemWriter.setRootTagName("personInfo");
 		return staxEventItemWriter;
