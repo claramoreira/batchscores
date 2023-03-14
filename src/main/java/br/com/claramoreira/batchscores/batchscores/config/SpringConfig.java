@@ -2,45 +2,30 @@ package br.com.claramoreira.batchscores.batchscores.config;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -52,9 +37,6 @@ import br.com.claramoreira.batchscores.batchscores.scheduler.SpringBatchQuartzSc
 @Configuration
 @EnableBatchProcessing
 public class SpringConfig {
-	
-	
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 	
 	
 	@Bean
@@ -103,56 +85,6 @@ public class SpringConfig {
 		SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
 		jobLauncher.setJobRepository(jbRepository);
 		return jobLauncher;
-	}
-
-	@Bean
-	public BeanWrapperFieldSetMapper<Person> beanWrapperFieldSetMapper() {
-		BeanWrapperFieldSetMapper<Person> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-		fieldSetMapper.setPrototypeBeanName("person");
-		return fieldSetMapper;
-	}
-
-	@Bean
-	public FlatFileItemReader<Person> fileItemReader(BeanWrapperFieldSetMapper<Person> beanWrapperFieldSetMapper) {
-		FlatFileItemReader<Person> fileItemReader = new FlatFileItemReader<>();
-		fileItemReader.setResource(new ClassPathResource("person.csv"));
-		DelimitedLineTokenizer delimitedLineTokenizer = new DelimitedLineTokenizer();
-		delimitedLineTokenizer.setNames("id", "firstName", "lastName");
-		DefaultLineMapper<Person> defaultLineMapper = new DefaultLineMapper<>();
-		defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
-		defaultLineMapper.setFieldSetMapper(beanWrapperFieldSetMapper);
-		fileItemReader.setLineMapper(defaultLineMapper);
-		return fileItemReader;
-	}
-
-	@Qualifier("jobv1")
-	@Bean(destroyMethod = "")
-	public StaxEventItemWriter<Person> staxEventItemWriter(Jaxb2Marshaller marshaller) {
-		StaxEventItemWriter<Person> staxEventItemWriter = new StaxEventItemWriter<>();
-		staxEventItemWriter.setResource(new FileSystemResource("C:/temp/person_" + dateFormat.format(new Date()) + ".xml"));
-		staxEventItemWriter.setMarshaller(marshaller);
-		staxEventItemWriter.setRootTagName("personInfo");
-		return staxEventItemWriter;
-	}
-
-	@Bean
-	public Job jobCsvXml(JobBuilderFactory jobBuilderFactory, Step step) {
-		return jobBuilderFactory.get("jobCsvXml").incrementer(new RunIdIncrementer()).flow(step).end().build();
-	}
-	
-
-	@Bean
-	public Step step1(StepBuilderFactory stepBuilderFactory, ResourcelessTransactionManager transactionManager,
-			ItemReader<Person> reader, ItemWriter<Person> writer, ItemProcessor<Person, Person> processor) {
-		return stepBuilderFactory.get("step1").transactionManager(transactionManager).<Person, Person>chunk(2)
-				.reader(reader).processor(processor).writer(writer).build();
-	}
-
-	@Bean
-	public Jaxb2Marshaller jaxb2Marshaller() {
-		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-		jaxb2Marshaller.setClassesToBeBound(Person.class);
-		return jaxb2Marshaller;
 	}
 
 	@Bean
