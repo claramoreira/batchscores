@@ -1,7 +1,5 @@
 package br.com.claramoreira.batchscores.batchscores.config;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
