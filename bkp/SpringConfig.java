@@ -5,8 +5,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -17,7 +15,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -26,7 +23,6 @@ import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import br.com.claramoreira.batchscores.batchscores.job.JobConfig;
 import br.com.claramoreira.batchscores.batchscores.scheduler.SpringBatchQuartzScheduler;
 
 @Configuration
@@ -47,7 +43,7 @@ public class SpringConfig {
 		factory.setTransactionManager(transactionManager);
 		return factory.getObject();
 	}
-
+	
 	@Bean
 	public TaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -101,30 +97,5 @@ public class SpringConfig {
 		schedulerFactoryBean.setTriggers(cronTrigger.getObject());
 		return schedulerFactoryBean;
 	}
-
-	@Bean
-	@Qualifier("jobDetail")
-	public JobDetail jobDetail() {
-		return JobBuilder.newJob().ofType((Class<? extends org.quartz.Job>) JobConfig.class).storeDurably()
-				.withIdentity("job").withDescription("very simple job").build();
-	}
-	
-	/*
-	
-	@Bean
-	@Qualifier("wineJob")
-	public JobDetail wineJobDetail() {
-		return JobBuilder.newJob().ofType((Class<? extends org.quartz.Job>) JobConfig.class).storeDurably()
-				.withIdentity("wineJob").withDescription("wine job").build();
-	}
-	
-	@Bean
-	@Qualifier("jobCsvXml")
-	public JobDetail jobCsvDetail() {
-		return JobBuilder.newJob().ofType((Class<? extends org.quartz.Job>) JobConfig.class).storeDurably()
-				.withIdentity("jobCsvXml").withDescription("very jobCsvXml job").build();
-	}
-	
-	*/
 
 }

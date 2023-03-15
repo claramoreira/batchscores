@@ -25,6 +25,11 @@ public class SpringBatchQuartzScheduler extends QuartzJobBean {
 	@Override
 	protected void executeInternal(JobExecutionContext context) {
 		Map<String, Object> jobMap = context.getMergedJobDataMap();
+		System.out.println("JOBMAP -<");
+		System.out.println(jobMap);
+		for (Map.Entry<String,Object> entry : jobMap.entrySet()) 
+            System.out.println("Key = " + entry.getKey() +
+                             ", Value = " + entry.getValue());
 		String jobName = (String) jobMap.get("jobName");
 
 		try {
