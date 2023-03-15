@@ -1,12 +1,8 @@
 package br.com.claramoreira.batchscores.batchscores.step;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.item.file.transform.PassThroughLineAggregator;
@@ -23,8 +19,6 @@ import br.com.claramoreira.batchscores.batchscores.reader.WineReader;
 
 @Configuration
 public class WineStepConfig {
-
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
 	@Autowired
 	private StepBuilderFactory steps;

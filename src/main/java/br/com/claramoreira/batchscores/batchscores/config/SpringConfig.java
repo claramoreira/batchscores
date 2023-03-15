@@ -13,55 +13,20 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import br.com.claramoreira.batchscores.batchscores.model.Person;
-import br.com.claramoreira.batchscores.batchscores.processor.PersonItemProcessor;
 import br.com.claramoreira.batchscores.batchscores.scheduler.SpringBatchQuartzScheduler;
 
 @Configuration
 @EnableBatchProcessing
 public class SpringConfig {
 	
-	
-	@Bean
-	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-	public Person person() {
-		return new Person();
-	}
-
-	@Bean
-	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-	public ItemProcessor<Person, Person> itemProcessor() {
-		return new PersonItemProcessor();
-	}
-
-	@Bean
-	public DataSource dataSource() {
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-		dataSource.setUrl("jdbc:mysql://localhost:3306/batchscores");
-		dataSource.setUsername("developer");
-		dataSource.setPassword("password");
-		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.addScript(new ClassPathResource("org/springframework/batch/core/schema-drop-mysql.sql"));
-		databasePopulator.addScript(new ClassPathResource("org/springframework/batch/core/schema-mysql.sql"));
-		DatabasePopulatorUtils.execute(databasePopulator, dataSource);
-		return dataSource;
-	}
 
 	@Bean
 	public ResourcelessTransactionManager txManager() {
@@ -93,11 +58,11 @@ public class SpringConfig {
 	}
 
 	@Bean
-	public JobDetailFactoryBean jobDetailFactoryBean(Job jobCsvXml, JobLauncher jobLauncher, JobRegistry jobLocator) {
+	public JobDetailFactoryBean jobDetailFactoryBean(Job job, JobLauncher jobLauncher, JobRegistry jobLocator) {
 		JobDetailFactoryBean jobDetailFactoryBean = new JobDetailFactoryBean();
 		jobDetailFactoryBean.setJobClass(SpringBatchQuartzScheduler.class);
 		Map<String, Object> map = new HashMap<>();
-		map.put("jobName", jobCsvXml.getName());
+		map.put("jobName", job.getName());
 		map.put("jobLauncher", jobLauncher);
 		map.put("jobLocator", jobLocator);
 		jobDetailFactoryBean.setJobDataAsMap(map);

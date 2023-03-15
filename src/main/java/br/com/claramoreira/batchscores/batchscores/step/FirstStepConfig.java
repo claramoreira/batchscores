@@ -13,29 +13,43 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import br.com.claramoreira.batchscores.batchscores.model.Person;
+import br.com.claramoreira.batchscores.batchscores.processor.PersonItemProcessor;
 
 @Configuration
 public class FirstStepConfig {
 
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
+	
+	@Bean
+	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
+	public Person person() {
+		return new Person();
+	}
+
+	@Bean
+	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
+	public ItemProcessor<Person, Person> itemProcessor() {
+		return new PersonItemProcessor();
+	}
+	
 	@Autowired
 	private StepBuilderFactory steps;
 	
-	@Autowired
-	private ItemProcessor<Person, Person> processor;
 
 
 	@Bean
 	public Step step3() {
-		return steps.get("step3").<Person, Person>chunk(2).reader(fileItemReader(beanWrapperFieldSetMapper())).processor(processor).writer(staxEventItemWriter(jaxb2Marshaller()))
+		return steps.get("step3").<Person, Person>chunk(2).reader(fileItemReader(beanWrapperFieldSetMapper())).processor(itemProcessor()).writer(staxEventItemWriter(jaxb2Marshaller()))
 				.build();
 	}
 
